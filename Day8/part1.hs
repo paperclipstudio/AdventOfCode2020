@@ -2,9 +2,9 @@
 run file = do
     handle <- readFile file
     let instructions = lines handle
-        out = runProgram (State instructions 0 0) []
-    print out
+    print $ runCorrect instructions
 
+    
 
 split line = (take 3 line, read (drop 5 line) * (if line !! 4 == '+' then 1 else (-1)))
 
@@ -22,3 +22,27 @@ runProgram state@(State lines lineNum acc) linesRun
     | lineNum `elem` linesRun = acc
     | lineNum >= length lines = acc
     | otherwise = runProgram (clock state) (lineNum:linesRun)
+
+ajust line 
+    | instruction == "jmp" = "nop"
+    | instruction == "nop" = "jmp" ++ drop 3 line
+    | otherwise = line
+    where
+        instruction = take 3 line
+
+mutate :: [String] -> Int -> [String]
+mutate lines current =  take current lines 
+    ++ ajust (lines !! current) :drop (current + 1) lines
+
+correct lines = head $ filter (\x -> not (doesLoop (State x 0 0))) $ map (mutate lines) [1..]
+
+runCorrect :: [String] -> Int
+runCorrect lines = runProgram (State (correct lines) 0 0) []
+
+doesLoop :: CPUState -> Bool
+doesLoop state = running state []
+    where
+        running state@(State lines lineNum _) linesRun 
+            | lineNum `elem` linesRun = True
+            | lineNum >= length lines = False
+            | otherwise = running (clock state) (lineNum:linesRun)
