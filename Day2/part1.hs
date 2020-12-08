@@ -5,16 +5,27 @@ apply func = do
     putStr $ show $ func nums
 
 getRange :: [Char] -> (Int , Int)
-getRange xs = (read low, read high) 
-    where
-        low = takeWhile (/= '-') xs
-        high = drop 1 $ dropWhile (/= '-') xs
-
+getRange xs = let
+                low = takeWhile (/= '-') xs
+                high = drop 1 $ dropWhile (/= '-') xs
+            in (read low, read high)
 count x = length.filter (== x) 
 
-isValid [vaild,letter,list] = (countOfLetter <= high) && (countOfLetter >= low)
+isValid [vaild,letter:_,list] = (countOfLetter <= high) && (countOfLetter >= low)
     where
         (low, high) = getRange vaild
-        countOfLetter = count (letter !! 1) list
+        countOfLetter = count letter list
 
-main = apply $ length.filter (== True).map isValid
+--main = apply $ length.filter (== True).map isValid
+
+-- part 2
+
+isValid2 [valid, letter:_, list] = 
+    checkIndex (first-1) /= checkIndex (second -1)
+    where
+        (first, second) = getRange valid
+        checkIndex index
+                | index >= length list = False
+                | otherwise = (list !! index) == letter
+
+main = apply $ length.filter (== True).map isValid2
