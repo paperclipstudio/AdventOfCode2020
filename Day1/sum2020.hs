@@ -7,7 +7,7 @@ sum2020 (x:xs)
     | otherwise =  sum2020 xs
 
 
-main = apply $  threeSum2020
+main = apply threeSum2020
 
 apply func = do
     handle <- readFile "data.txt"

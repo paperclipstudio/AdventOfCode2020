@@ -1,10 +1,7 @@
-
 run file = do
     handle <- readFile file
     let instructions = lines handle
     print $ runCorrect instructions
-
-    
 
 split line = (take 3 line, read (drop 5 line) * (if line !! 4 == '+' then 1 else (-1)))
 
@@ -34,7 +31,11 @@ mutate :: [String] -> Int -> [String]
 mutate lines current =  take current lines 
     ++ ajust (lines !! current) :drop (current + 1) lines
 
-correct lines = head $ filter (\x -> not (doesLoop (State x 0 0))) $ map (mutate lines) [1..]
+correct lines = (head
+                    .filter (\x -> not (doesLoop (State x 0 0))) -- remove all that now loop
+                    .map (mutate lines)                          -- mutate this line
+                    .filter (\x -> take 3 (lines !! x) /= "acc"))-- remove all that would mutate a "acc" line
+                    [1..]
 
 runCorrect :: [String] -> Int
 runCorrect lines = runProgram (State (correct lines) 0 0) []
