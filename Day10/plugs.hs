@@ -1,5 +1,6 @@
 import Data.List
 
+main = apply $ countLeaf .  (makeTree 163 [])
 apply func = do
     handle <- readFile "data"
     let line = map read (lines handle) :: [Int]
@@ -34,11 +35,15 @@ data Tree =
     | Leaf [Int]
 
 
-makeTree :: [Int] -> [Int] -> Tree
-makeTree ys [] = Leaf ys
-makeTree ys (x:xs) = Branch ys (makeTree ys xs) (makeTree (x:ys) xs)
+makeTree :: Int -> [Int] -> [Int] -> Tree
+makeTree _ ys [] = Leaf ys
+makeTree max ys (x:xs) = 
+    if checkValidtoMax max (xs ++ [x] ++ ys) then
+         Branch ys (makeTree max ys xs) (makeTree max (x:ys) xs)
+         else
+             Leaf []
 
-checkValidFrom0to166 xs = checkValid (0:xs ++ [22])
+checkValidtoMax max xs = checkValid $ sort (0:xs ++ [max + 3])
 
 checkValid [] = True;
 checkValid [_]= True
@@ -50,10 +55,10 @@ checkValid (x:y:xs)
 test :: [Int]
 test = [16, 10, 15, 5, 1, 11, 7, 19, 6, 12, 4]
 checkTree (Branch ys l r) = checkValid ys && checkTree l && checkTree r 
-checkTree (Leaf ys) = checkValidFrom0to166 ys
+checkTree (Leaf ys) = checkValidtoMax 163 ys
 
 trimTree (Leaf x) = 
-    if checkValidFrom0to166 x 
+    if checkValidtoMax 163 x 
         then
             Leaf x
         else
@@ -83,8 +88,8 @@ fullTrim tree= if hasNull tree then fullTrim (trimTree tree) else tree
 
 instance Show Tree where
     show (Branch _ l r) = 
-        "<" ++ show l 
-        ++ "↑>"++ show r ++ "↑"
+        "←" ++ show l 
+        ++ "↑→"++ show r ++ "↑"
     show (Leaf []) = "*"
     show (Leaf list) = show list ++ "\n"
     
